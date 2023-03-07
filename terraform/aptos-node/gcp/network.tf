@@ -1,5 +1,5 @@
 resource "google_compute_network" "aptos" {
-  name                    = "aptos-${local.workspace_name}"
+  name                    = "aptos-${terraform.workspace}"
   auto_create_subnetworks = true
 }
 
@@ -17,16 +17,16 @@ data "google_compute_subnetwork" "region" {
 }
 
 resource "google_compute_router" "nat" {
-  name    = "aptos-${local.workspace_name}-nat"
+  name    = "aptos-${terraform.workspace}-nat"
   network = google_compute_network.aptos.id
 }
 
 resource "google_compute_address" "nat" {
-  name = "aptos-${local.workspace_name}-nat"
+  name = "aptos-${terraform.workspace}-nat"
 }
 
 resource "google_compute_router_nat" "nat" {
-  name                               = "aptos-${local.workspace_name}-nat"
+  name                               = "aptos-${terraform.workspace}-nat"
   router                             = google_compute_router.nat.name
   nat_ip_allocate_option             = "MANUAL_ONLY"
   nat_ips                            = [google_compute_address.nat.self_link]

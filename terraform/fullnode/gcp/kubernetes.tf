@@ -87,7 +87,7 @@ resource "helm_release" "fullnode" {
       image = {
         tag = var.image_tag
       }
-      nodeSelector = var.gke_enable_node_autoprovisioning ? {} : {
+      nodeSelector = {
         "cloud.google.com/gke-nodepool"          = "fullnodes"
         "iam.gke.io/gke-metadata-server-enabled" = "true"
       }
@@ -129,13 +129,9 @@ resource "helm_release" "fullnode" {
   ]
 
   # inspired by https://stackoverflow.com/a/66501021 to trigger redeployment whenever any of the charts file contents change.
-  dynamic "set" {
-    for_each = var.manage_via_tf ? toset([""]) : toset([])
-    content {
-      # inspired by https://stackoverflow.com/a/66501021 to trigger redeployment whenever any of the charts file contents change.
-      name  = "chart_sha1"
-      value = sha1(join("", [for f in fileset(local.fullnode_helm_chart_path, "**") : filesha1("${local.fullnode_helm_chart_path}/${f}")]))
-    }
+  set {
+    name  = "chart_sha1"
+    value = sha1(join("", [for f in fileset(local.fullnode_helm_chart_path, "**") : filesha1("${local.fullnode_helm_chart_path}/${f}")]))
   }
 }
 

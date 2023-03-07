@@ -124,8 +124,12 @@ Create the name of the service account to use
 {{ include "aptos-fullnode.fullname" . }}-e{{ .Values.chain.era }}
 {{- end -}}
 
-{{- define "backup.pushMetricsEndpoint" -}}
-{{- if .Values.backup.pushMetricsEndpoint -}}
-{{ .Values.backup.pushMetricsEndpoint }}
+{{- define "backup.pushGateway" -}}
+{{- if .Values.backup.pushGateway -}}
+{{ .Values.backup.pushGateway }}
 {{- end -}}
+{{- end -}}
+
+{{- define "backup.loggingAddress" -}}
+{{ .Values.logging.address }}
 {{- end -}}

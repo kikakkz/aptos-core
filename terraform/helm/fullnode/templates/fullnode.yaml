@@ -1,4 +1,3 @@
-{{ $fullnode_statefulset := lookup "apps/v1" "StatefulSet" $.Release.Namespace (include "aptos-fullnode.fullname" .) }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -27,11 +26,7 @@ spec:
       terminationGracePeriodSeconds: 0
       containers:
       - name: fullnode
-        {{- if and $fullnode_statefulset (not $.Values.manageImages) }} # if the statefulset already exists and we do not want helm to simply overwrite the image, use the existing image
-        image: {{ (first $fullnode_statefulset.spec.template.spec.containers).image }}
-        {{- else }}
-        image: {{ .Values.image.repo }}:{{ .Values.image.tag | default $.Values.imageTag }}
-        {{- end }}
+        image: {{ .Values.image.repo }}:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command:
         - /bin/sh
@@ -48,8 +43,14 @@ spec:
         resources:
           {{- toYaml .Values.resources | nindent 10 }}
         env:
+        {{- if .Values.logging.address }}
+        - name: STRUCT_LOG_TCP_ADDR
+          value: {{ $.Values.logging.address | quote }}
+        {{- end }}
         - name: RUST_LOG
           value: {{ .Values.rust_log }}
+        - name: RUST_LOG_REMOTE
+          value: {{ .Values.rust_log_remote }}
         - name: KUBERNETES_NAMESPACE
           valueFrom:
             fieldRef:
